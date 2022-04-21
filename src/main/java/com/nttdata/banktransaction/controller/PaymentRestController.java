@@ -28,27 +28,22 @@ public class PaymentRestController {
     /**
      * @return list of payments
      */
-    @GetMapping
-    public Mono<ResponseEntity<Flux<Payment>>> getAll() {
-        return Mono.just(
-                        ResponseEntity
-                                .ok()
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .body(paymentService.findAll()))
-                .defaultIfEmpty(ResponseEntity.notFound().build());
+    @ResponseStatus(HttpStatus.OK)
+    @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
+    public Flux<Payment> getAll() {
+        return paymentService.findAll();
     }
 
     /**
      * @param payment request to create payment
      * @return payment created
      */
-    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<ResponseEntity<Payment>> create(@RequestBody Payment payment) {
-        return paymentService.create(payment)
-                .map(bac -> ResponseEntity
-                        .created(URI.create(""))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .body(bac));
+    @ResponseStatus(HttpStatus.CREATED)
+    @PostMapping(
+            consumes = MediaType.APPLICATION_JSON_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<Payment> create(@RequestBody Payment payment) {
+        return paymentService.create(payment);
     }
 
     /**
@@ -56,15 +51,14 @@ public class PaymentRestController {
      * @param paymentRequest request for update payment
      * @return payment updated
      */
-    @PutMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<ResponseEntity<Payment>> update(@PathVariable(name = "id") String id,
-                                                @RequestBody Payment paymentRequest) {
-        return paymentService.update(id, paymentRequest)
-                .map(bac -> ResponseEntity
-                        .created(URI.create(""))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .body(bac))
-                .defaultIfEmpty(ResponseEntity.notFound().build());
+    @ResponseStatus(HttpStatus.CREATED)
+    @PutMapping(
+            value = "/{id}",
+            consumes = MediaType.APPLICATION_JSON_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<Payment> update(@PathVariable(name = "id") String id,
+                                @RequestBody Payment paymentRequest) {
+        return paymentService.update(id, paymentRequest);
     }
 
     /**
@@ -72,11 +66,8 @@ public class PaymentRestController {
      * @return void
      */
     @DeleteMapping("/{id}")
-    public Mono<ResponseEntity<Void>> delete(@PathVariable(name = "id") String id) {
-        return paymentService.delete(id)
-                .then(Mono.just(
-                        new ResponseEntity<>(HttpStatus.NO_CONTENT)
-                ));
+    public Mono<Void> delete(@PathVariable(name = "id") String id) {
+        return paymentService.delete(id);
     }
 
 }

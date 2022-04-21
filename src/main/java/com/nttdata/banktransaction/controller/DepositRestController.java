@@ -2,11 +2,15 @@ package com.nttdata.banktransaction.controller;
 
 import com.nttdata.banktransaction.model.Deposit;
 import com.nttdata.banktransaction.service.IDepositService;
+import com.nttdata.banktransaction.service.impl.DepositServiceImpl;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -23,32 +27,29 @@ import java.net.URI;
 @RequestMapping("/api/v1/deposits")
 public class DepositRestController {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(DepositServiceImpl.class);
+
     private final IDepositService depositService;
 
     /**
      * @return list of deposits
      */
-    @GetMapping
-    public Mono<ResponseEntity<Flux<Deposit>>> getAll() {
-        return Mono.just(
-                        ResponseEntity
-                                .ok()
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .body(depositService.findAll()))
-                .defaultIfEmpty(ResponseEntity.notFound().build());
+    @ResponseStatus(HttpStatus.OK)
+    @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
+    public Flux<Deposit> getAll() {
+        return depositService.findAll();
     }
 
     /**
      * @param deposit request to create deposit
      * @return deposit created
      */
-    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<ResponseEntity<Deposit>> create(@RequestBody Deposit deposit) {
-        return depositService.create(deposit)
-                .map(bac -> ResponseEntity
-                        .created(URI.create(""))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .body(bac));
+    @ResponseStatus(HttpStatus.CREATED)
+    @PostMapping(
+            consumes = MediaType.APPLICATION_JSON_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<Deposit> create(@RequestBody Deposit deposit) {
+        return depositService.create(deposit);
     }
 
     /**
@@ -56,27 +57,24 @@ public class DepositRestController {
      * @param depositRequest request for update deposit
      * @return deposit updated
      */
-    @PutMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<ResponseEntity<Deposit>> update(@PathVariable(name = "id") String id,
-                                                @RequestBody Deposit depositRequest) {
-        return depositService.update(id, depositRequest)
-                .map(bac -> ResponseEntity
-                        .created(URI.create(""))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .body(bac))
-                .defaultIfEmpty(ResponseEntity.notFound().build());
+    @ResponseStatus(HttpStatus.CREATED)
+    @PutMapping(
+            value = "/{id}",
+            consumes = MediaType.APPLICATION_JSON_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<Deposit> update(@PathVariable(name = "id") String id,
+                                @RequestBody Deposit depositRequest) {
+        return depositService.update(id, depositRequest);
     }
 
     /**
      * @param id deposit id to delete
      * @return void
      */
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     @DeleteMapping("/{id}")
-    public Mono<ResponseEntity<Void>> delete(@PathVariable(name = "id") String id) {
-        return depositService.delete(id)
-                .then(Mono.just(
-                        new ResponseEntity<>(HttpStatus.NO_CONTENT)
-                ));
+    public Mono<Void> delete(@PathVariable(name = "id") String id) {
+        return depositService.delete(id);
     }
 
 }

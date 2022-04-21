@@ -4,7 +4,11 @@ import com.nttdata.banktransaction.model.Withdrawal;
 import com.nttdata.banktransaction.repository.IWithdrawalRepository;
 import com.nttdata.banktransaction.service.IWithdrawalService;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -18,6 +22,8 @@ import reactor.core.publisher.Mono;
 @Service
 public class WithdrawalServiceImpl implements IWithdrawalService {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(WithdrawalServiceImpl.class);
+
     private final IWithdrawalRepository withdrawalRepository;
 
     /**
@@ -27,7 +33,11 @@ public class WithdrawalServiceImpl implements IWithdrawalService {
      */
     @Override
     public Flux<Withdrawal> findAll() {
-        return withdrawalRepository.findAll();
+        return withdrawalRepository.findAll()
+                .onErrorResume(e -> {
+                    LOGGER.error("[" + getClass().getName() + "][findAll]" + e.getMessage());
+                    return Mono.error(new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "" + e));
+                });
     }
 
     /**
@@ -38,7 +48,13 @@ public class WithdrawalServiceImpl implements IWithdrawalService {
      */
     @Override
     public Mono<Withdrawal> create(Withdrawal withdrawalRequest) {
-        return withdrawalRepository.save(withdrawalRequest);
+        return withdrawalRepository.save(withdrawalRequest)
+                .onErrorResume(e -> {
+                    LOGGER.error("[" + getClass().getName() + "][create]" + e.getMessage());
+                    return Mono.error(new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad Request" + e));
+                }).switchIfEmpty(
+                        Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND))
+                );
     }
 
     /**
@@ -56,7 +72,12 @@ public class WithdrawalServiceImpl implements IWithdrawalService {
                 .flatMap(w -> {
                     w.setAmount(withdrawalRequest.getAmount());
                     return withdrawalRepository.save(w);
-                });
+                }).onErrorResume(e -> {
+                    LOGGER.error("[" + getClass().getName() + "][update]" + e.getMessage());
+                    return Mono.error(new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad Request" + e));
+                }).switchIfEmpty(
+                        Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND))
+                );
     }
 
     /**
@@ -67,7 +88,11 @@ public class WithdrawalServiceImpl implements IWithdrawalService {
      */
     @Override
     public Mono<Void> delete(String id) {
-        return withdrawalRepository.deleteById(id);
+        return withdrawalRepository.deleteById(id)
+                .onErrorResume(e -> {
+                    LOGGER.error("[" + getClass().getName() + "][delete]" + e.getMessage());
+                    return Mono.error(new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad Request" + e));
+                });
     }
 
 }

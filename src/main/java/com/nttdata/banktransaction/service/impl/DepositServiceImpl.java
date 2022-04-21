@@ -4,7 +4,11 @@ import com.nttdata.banktransaction.model.Deposit;
 import com.nttdata.banktransaction.repository.IDepositRepository;
 import com.nttdata.banktransaction.service.IDepositService;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -18,6 +22,8 @@ import reactor.core.publisher.Mono;
 @Service
 public class DepositServiceImpl implements IDepositService {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(DepositServiceImpl.class);
+
     private final IDepositRepository depositRepository;
 
     /**
@@ -27,7 +33,11 @@ public class DepositServiceImpl implements IDepositService {
      */
     @Override
     public Flux<Deposit> findAll() {
-        return depositRepository.findAll();
+        return depositRepository.findAll()
+                .onErrorResume(e -> {
+                    LOGGER.error("[" + getClass().getName() + "][findAll]" + e.getMessage());
+                    return Mono.error(new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "" + e));
+                });
     }
 
     /**
@@ -38,7 +48,13 @@ public class DepositServiceImpl implements IDepositService {
      */
     @Override
     public Mono<Deposit> create(Deposit depositRequest) {
-        return depositRepository.save(depositRequest);
+        return depositRepository.save(depositRequest)
+                .onErrorResume(e -> {
+                    LOGGER.error("[" + getClass().getName() + "][create]" + e.getMessage());
+                    return Mono.error(new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad Request" + e));
+                }).switchIfEmpty(
+                        Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND))
+                );
     }
 
     /**
@@ -56,7 +72,12 @@ public class DepositServiceImpl implements IDepositService {
                 .flatMap(d -> {
                     d.setAmount(depositRequest.getAmount());
                     return depositRepository.save(d);
-                });
+                }).onErrorResume(e -> {
+                    LOGGER.error("[" + getClass().getName() + "][update]" + e.getMessage());
+                    return Mono.error(new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad Request" + e));
+                }).switchIfEmpty(
+                        Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND))
+                );
     }
 
     /**
@@ -67,6 +88,10 @@ public class DepositServiceImpl implements IDepositService {
      */
     @Override
     public Mono<Void> delete(String id) {
-        return depositRepository.deleteById(id);
+        return depositRepository.deleteById(id)
+                .onErrorResume(e -> {
+                    LOGGER.error("[" + getClass().getName() + "][delete]" + e.getMessage());
+                    return Mono.error(new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad Request" + e));
+                });
     }
 }
