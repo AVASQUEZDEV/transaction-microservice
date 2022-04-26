@@ -1,5 +1,8 @@
 package com.nttdata.banktransaction.controller;
 
+import com.nttdata.banktransaction.dto.mapper.CreditMapper;
+import com.nttdata.banktransaction.dto.request.CreditRequest;
+import com.nttdata.banktransaction.dto.response.CreditResponse;
 import com.nttdata.banktransaction.model.Credit;
 import com.nttdata.banktransaction.service.ICreditService;
 import lombok.RequiredArgsConstructor;
@@ -25,30 +28,32 @@ public class CreditRestController {
 
     private final ICreditService creditService;
 
+    private final CreditMapper creditMapper;
+
     /**
      * @return list of credits
      */
     @ResponseStatus(HttpStatus.OK)
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-    public Flux<Credit> getAll() {
-        return creditService.findAll();
+    public Flux<CreditResponse> getAll() {
+        return creditMapper.toFluxResponse(creditService.findAll());
     }
 
     /**
-     * @param credit request to create credit
+     * @param request request to create credit
      * @return credit created
      */
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping(
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<Credit> create(@RequestBody Credit credit) {
-        return creditService.create(credit);
+    public Mono<CreditResponse> create(@RequestBody CreditRequest request) {
+        return creditMapper.toMonoResponse(creditService.create(request));
     }
 
     /**
      * @param id            credit id to update
-     * @param creditRequest request for update credit
+     * @param request request for update credit
      * @return credit updated
      */
     @ResponseStatus(HttpStatus.CREATED)
@@ -56,9 +61,9 @@ public class CreditRestController {
             value = "/{id}",
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<Credit> update(@PathVariable(name = "id") String id,
-                               @RequestBody Credit creditRequest) {
-        return creditService.update(id, creditRequest);
+    public Mono<CreditResponse> update(@PathVariable(name = "id") String id,
+                               @RequestBody CreditRequest request) {
+        return creditMapper.toMonoResponse(creditService.update(id, request));
     }
 
     /**

@@ -3,6 +3,7 @@ package com.nttdata.banktransaction.model;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
@@ -18,6 +19,7 @@ import java.util.Date;
  */
 @Data
 @Builder
+@NoArgsConstructor
 @AllArgsConstructor
 @Document(collection = "deposits")
 public class Deposit {
@@ -41,4 +43,11 @@ public class Deposit {
     @Field(name = "transaction_date")
     private Date transactionDate;
 
+    public Deposit(String destinationAccount, String originAccount, Float amount, String issueBank, Date transactionDate) {
+        this.destinationAccount = destinationAccount;
+        this.originAccount = originAccount;
+        this.amount = amount;
+        this.issueBank = issueBank;
+        this.transactionDate = transactionDate;
+    }
 }

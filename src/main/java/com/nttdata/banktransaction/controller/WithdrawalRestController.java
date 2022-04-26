@@ -1,5 +1,8 @@
 package com.nttdata.banktransaction.controller;
 
+import com.nttdata.banktransaction.dto.mapper.WithdrawalMapper;
+import com.nttdata.banktransaction.dto.request.WithdrawalRequest;
+import com.nttdata.banktransaction.dto.response.WithdrawalResponse;
 import com.nttdata.banktransaction.model.Withdrawal;
 import com.nttdata.banktransaction.service.IWithdrawalService;
 import lombok.RequiredArgsConstructor;
@@ -25,30 +28,32 @@ public class WithdrawalRestController {
 
     private final IWithdrawalService withdrawalService;
 
+    private final WithdrawalMapper withdrawalMapper;
+
     /**
      * @return list of withdrawals
      */
     @ResponseStatus(HttpStatus.OK)
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-    public Flux<Withdrawal> getAll() {
-        return withdrawalService.findAll();
+    public Flux<WithdrawalResponse> getAll() {
+        return withdrawalMapper.toFluxResponse(withdrawalService.findAll());
     }
 
     /**
-     * @param withdrawal request to create withdrawal
+     * @param request request to create withdrawal
      * @return withdrawal created
      */
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping(
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<Withdrawal> create(@RequestBody Withdrawal withdrawal) {
-        return withdrawalService.create(withdrawal);
+    public Mono<WithdrawalResponse> create(@RequestBody WithdrawalRequest request) {
+        return withdrawalMapper.toMonoResponse(withdrawalService.create(request));
     }
 
     /**
      * @param id                withdrawal id to update
-     * @param withdrawalRequest request for update withdrawal
+     * @param request request for update withdrawal
      * @return withdrawal updated
      */
     @ResponseStatus(HttpStatus.CREATED)
@@ -56,9 +61,9 @@ public class WithdrawalRestController {
             value = "/{id}",
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<Withdrawal> update(@PathVariable(name = "id") String id,
-                                   @RequestBody Withdrawal withdrawalRequest) {
-        return withdrawalService.update(id, withdrawalRequest);
+    public Mono<WithdrawalResponse> update(@PathVariable(name = "id") String id,
+                                   @RequestBody WithdrawalRequest request) {
+        return withdrawalMapper.toMonoResponse(withdrawalService.update(id, request));
     }
 
     /**

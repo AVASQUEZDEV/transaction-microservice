@@ -1,5 +1,7 @@
 package com.nttdata.banktransaction.service.impl;
 
+import com.nttdata.banktransaction.dto.mapper.DepositMapper;
+import com.nttdata.banktransaction.dto.request.DepositRequest;
 import com.nttdata.banktransaction.model.Deposit;
 import com.nttdata.banktransaction.repository.IDepositRepository;
 import com.nttdata.banktransaction.service.IDepositService;
@@ -26,6 +28,8 @@ public class DepositServiceImpl implements IDepositService {
 
     private final IDepositRepository depositRepository;
 
+    private final DepositMapper depositMapper;
+
     /**
      * This method returns a list of deposits
      *
@@ -43,41 +47,37 @@ public class DepositServiceImpl implements IDepositService {
     /**
      * This method creates a deposits
      *
-     * @param depositRequest request to create new deposit
+     * @param request request to create new deposit
      * @return deposit created
      */
     @Override
-    public Mono<Deposit> create(Deposit depositRequest) {
-        return depositRepository.save(depositRequest)
+    public Mono<Deposit> create(DepositRequest request) {
+        return depositMapper.toPostModel(request)
+                .flatMap(depositRepository::save)
                 .onErrorResume(e -> {
                     LOGGER.error("[" + getClass().getName() + "][create]" + e.getMessage());
                     return Mono.error(new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad Request" + e));
-                }).switchIfEmpty(
-                        Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND))
-                );
+                }).switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND)));
     }
 
     /**
      * This method updates a deposit
      *
      * @param id             deposit id to update
-     * @param depositRequest request to update deposit
+     * @param request request to update deposit
      * @return deposit updated
      */
     @Override
-    public Mono<Deposit> update(String id, Deposit depositRequest) {
+    public Mono<Deposit> update(String id, DepositRequest request) {
         return findAll()
                 .filter(d -> d.getId().equals(id))
                 .single()
-                .flatMap(d -> {
-                    d.setAmount(depositRequest.getAmount());
-                    return depositRepository.save(d);
-                }).onErrorResume(e -> {
+                .flatMap(d -> depositMapper.toPutModel(d, request)
+                        .flatMap(depositRepository::save))
+                .onErrorResume(e -> {
                     LOGGER.error("[" + getClass().getName() + "][update]" + e.getMessage());
                     return Mono.error(new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad Request" + e));
-                }).switchIfEmpty(
-                        Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND))
-                );
+                }).switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND)));
     }
 
     /**

@@ -1,5 +1,7 @@
 package com.nttdata.banktransaction.service.impl;
 
+import com.nttdata.banktransaction.dto.mapper.CreditMapper;
+import com.nttdata.banktransaction.dto.request.CreditRequest;
 import com.nttdata.banktransaction.model.Credit;
 import com.nttdata.banktransaction.repository.ICreditRepository;
 import com.nttdata.banktransaction.service.ICreditService;
@@ -23,7 +25,10 @@ import reactor.core.publisher.Mono;
 public class CreditServiceImpl implements ICreditService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CreditServiceImpl.class);
+
     private final ICreditRepository creditRepository;
+
+    private final CreditMapper creditMapper;
 
     /**
      * This method returns a list of credits
@@ -42,41 +47,37 @@ public class CreditServiceImpl implements ICreditService {
     /**
      * This method creates a credits
      *
-     * @param creditRequest request to create new credit
+     * @param request request to create new credit
      * @return credit created
      */
     @Override
-    public Mono<Credit> create(Credit creditRequest) {
-        return creditRepository.save(creditRequest)
+    public Mono<Credit> create(CreditRequest request) {
+        return creditMapper.toPostModel(request)
+                .flatMap(creditRepository::save)
                 .onErrorResume(e -> {
                     LOGGER.error("[" + getClass().getName() + "][create]" + e.getMessage());
                     return Mono.error(new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad Request" + e));
-                }).switchIfEmpty(
-                        Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND))
-                );
+                }).switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND)));
     }
 
     /**
      * This method updates a credit
      *
-     * @param id            credit id to update
-     * @param creditRequest request to update credit
+     * @param id      credit id to update
+     * @param request request to update credit
      * @return credit updated
      */
     @Override
-    public Mono<Credit> update(String id, Credit creditRequest) {
+    public Mono<Credit> update(String id, CreditRequest request) {
         return findAll()
                 .filter(c -> c.getId().equals(id))
                 .single()
-                .flatMap(c -> {
-                    c.setAmount(creditRequest.getAmount());
-                    return creditRepository.save(c);
-                }).onErrorResume(e -> {
+                .flatMap(c -> creditMapper.toPutModel(c, request))
+                    .flatMap(creditRepository::save)
+                .onErrorResume(e -> {
                     LOGGER.error("[" + getClass().getName() + "][update]" + e.getMessage());
                     return Mono.error(new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad Request" + e));
-                }).switchIfEmpty(
-                        Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND))
-                );
+                }).switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND)));
     }
 
     /**

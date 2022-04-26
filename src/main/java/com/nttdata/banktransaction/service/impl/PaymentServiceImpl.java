@@ -1,5 +1,7 @@
 package com.nttdata.banktransaction.service.impl;
 
+import com.nttdata.banktransaction.dto.mapper.PaymentMapper;
+import com.nttdata.banktransaction.dto.request.PaymentRequest;
 import com.nttdata.banktransaction.model.Payment;
 import com.nttdata.banktransaction.repository.IPaymentRepository;
 import com.nttdata.banktransaction.service.IPaymentService;
@@ -26,6 +28,8 @@ public class PaymentServiceImpl implements IPaymentService {
 
     private final IPaymentRepository paymentRepository;
 
+    private final PaymentMapper paymentMapper;
+
     /**
      * This method returns a list of payments
      *
@@ -43,41 +47,37 @@ public class PaymentServiceImpl implements IPaymentService {
     /**
      * This method creates a payments
      *
-     * @param paymentRequest request to create new payment
+     * @param request request to create new payment
      * @return payment created
      */
     @Override
-    public Mono<Payment> create(Payment paymentRequest) {
-        return paymentRepository.save(paymentRequest)
+    public Mono<Payment> create(PaymentRequest request) {
+        return paymentMapper.toPostModel(request)
+                .flatMap(paymentRepository::save)
                 .onErrorResume(e -> {
                     LOGGER.error("[" + getClass().getName() + "][create]" + e.getMessage());
                     return Mono.error(new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad Request" + e));
-                }).switchIfEmpty(
-                        Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND))
-                );
+                }).switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND)));
     }
 
     /**
      * This method updates a payment
      *
      * @param id             payment id to update
-     * @param paymentRequest request to update payment
+     * @param request request to update payment
      * @return payment updated
      */
     @Override
-    public Mono<Payment> update(String id, Payment paymentRequest) {
+    public Mono<Payment> update(String id, PaymentRequest request) {
         return findAll()
                 .filter(p -> p.getId().equals(id))
                 .single()
-                .flatMap(p -> {
-                    p.setAmount(paymentRequest.getAmount());
-                    return paymentRepository.save(p);
-                }).onErrorResume(e -> {
+                .flatMap(p -> paymentMapper.toPutModel(p, request)
+                        .flatMap(paymentRepository::save))
+                .onErrorResume(e -> {
                     LOGGER.error("[" + getClass().getName() + "][update]" + e.getMessage());
                     return Mono.error(new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad Request" + e));
-                }).switchIfEmpty(
-                        Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND))
-                );
+                }).switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND)));
     }
 
     /**

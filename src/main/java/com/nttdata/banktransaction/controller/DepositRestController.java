@@ -1,5 +1,8 @@
 package com.nttdata.banktransaction.controller;
 
+import com.nttdata.banktransaction.dto.mapper.DepositMapper;
+import com.nttdata.banktransaction.dto.request.DepositRequest;
+import com.nttdata.banktransaction.dto.response.DepositResponse;
 import com.nttdata.banktransaction.model.Deposit;
 import com.nttdata.banktransaction.service.IDepositService;
 import com.nttdata.banktransaction.service.impl.DepositServiceImpl;
@@ -31,30 +34,32 @@ public class DepositRestController {
 
     private final IDepositService depositService;
 
+    private final DepositMapper depositMapper;
+
     /**
      * @return list of deposits
      */
     @ResponseStatus(HttpStatus.OK)
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-    public Flux<Deposit> getAll() {
-        return depositService.findAll();
+    public Flux<DepositResponse> getAll() {
+        return depositMapper.toFluxResponse(depositService.findAll());
     }
 
     /**
-     * @param deposit request to create deposit
+     * @param request request to create deposit
      * @return deposit created
      */
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping(
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<Deposit> create(@RequestBody Deposit deposit) {
-        return depositService.create(deposit);
+    public Mono<DepositResponse> create(@RequestBody DepositRequest request) {
+        return depositMapper.toMonoResponse(depositService.create(request));
     }
 
     /**
      * @param id             deposit id to update
-     * @param depositRequest request for update deposit
+     * @param request request for update deposit
      * @return deposit updated
      */
     @ResponseStatus(HttpStatus.CREATED)
@@ -62,9 +67,9 @@ public class DepositRestController {
             value = "/{id}",
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<Deposit> update(@PathVariable(name = "id") String id,
-                                @RequestBody Deposit depositRequest) {
-        return depositService.update(id, depositRequest);
+    public Mono<DepositResponse> update(@PathVariable(name = "id") String id,
+                                @RequestBody DepositRequest request) {
+        return depositMapper.toMonoResponse(depositService.update(id, request));
     }
 
     /**

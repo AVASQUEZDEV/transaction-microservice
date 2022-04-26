@@ -1,5 +1,6 @@
 package com.nttdata.banktransaction.service;
 
+import com.nttdata.banktransaction.dto.request.PaymentRequest;
 import com.nttdata.banktransaction.model.Payment;
 import org.springframework.stereotype.Repository;
 import reactor.core.publisher.Flux;
@@ -15,9 +16,9 @@ public interface IPaymentService {
 
     Flux<Payment> findAll();
 
-    Mono<Payment> create(Payment paymentRequest);
+    Mono<Payment> create(PaymentRequest request);
 
-    Mono<Payment> update(String id, Payment paymentRequest);
+    Mono<Payment> update(String id, PaymentRequest request);
 
     Mono<Void> delete(String id);
 

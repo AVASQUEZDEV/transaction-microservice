@@ -1,5 +1,7 @@
 package com.nttdata.banktransaction.service.impl;
 
+import com.nttdata.banktransaction.dto.mapper.WithdrawalMapper;
+import com.nttdata.banktransaction.dto.request.WithdrawalRequest;
 import com.nttdata.banktransaction.model.Withdrawal;
 import com.nttdata.banktransaction.repository.IWithdrawalRepository;
 import com.nttdata.banktransaction.service.IWithdrawalService;
@@ -26,6 +28,8 @@ public class WithdrawalServiceImpl implements IWithdrawalService {
 
     private final IWithdrawalRepository withdrawalRepository;
 
+    private final WithdrawalMapper withdrawalMapper;
+
     /**
      * This method returns a list of withdrawal
      *
@@ -43,41 +47,37 @@ public class WithdrawalServiceImpl implements IWithdrawalService {
     /**
      * This method creates a withdrawal
      *
-     * @param withdrawalRequest request to create new withdrawal
+     * @param request request to create new withdrawal
      * @return withdrawal created
      */
     @Override
-    public Mono<Withdrawal> create(Withdrawal withdrawalRequest) {
-        return withdrawalRepository.save(withdrawalRequest)
+    public Mono<Withdrawal> create(WithdrawalRequest request) {
+        return withdrawalMapper.toPostModel(request)
+                .flatMap(withdrawalRepository::save)
                 .onErrorResume(e -> {
                     LOGGER.error("[" + getClass().getName() + "][create]" + e.getMessage());
                     return Mono.error(new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad Request" + e));
-                }).switchIfEmpty(
-                        Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND))
-                );
+                }).switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND)));
     }
 
     /**
      * This method updates a withdrawal
      *
      * @param id                withdrawal id to update
-     * @param withdrawalRequest request to update withdrawal
+     * @param request request to update withdrawal
      * @return withdrawal updated
      */
     @Override
-    public Mono<Withdrawal> update(String id, Withdrawal withdrawalRequest) {
+    public Mono<Withdrawal> update(String id, WithdrawalRequest request) {
         return findAll()
                 .filter(w -> w.getId().equals(id))
                 .single()
-                .flatMap(w -> {
-                    w.setAmount(withdrawalRequest.getAmount());
-                    return withdrawalRepository.save(w);
-                }).onErrorResume(e -> {
+                .flatMap(w -> withdrawalMapper.toPutModel(w, request)
+                        .flatMap(withdrawalRepository::save))
+                .onErrorResume(e -> {
                     LOGGER.error("[" + getClass().getName() + "][update]" + e.getMessage());
                     return Mono.error(new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad Request" + e));
-                }).switchIfEmpty(
-                        Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND))
-                );
+                }).switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND)));
     }
 
     /**
