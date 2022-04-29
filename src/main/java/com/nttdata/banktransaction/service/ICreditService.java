@@ -15,6 +15,8 @@ public interface ICreditService {
 
     Flux<Credit> findAll();
 
+    Mono<Credit> findById(String id);
+
     Mono<Credit> create(CreditRequest request);
 
     Mono<Credit> update(String id, CreditRequest request);

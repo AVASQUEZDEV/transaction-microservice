@@ -11,6 +11,7 @@ import lombok.Data;
 @Data
 public class CreditRequest {
 
+    private String personId;
     private Float amount;
 
 }

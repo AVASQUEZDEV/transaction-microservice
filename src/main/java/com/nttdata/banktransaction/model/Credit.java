@@ -27,6 +27,8 @@ public class Credit {
     @Id
     private String id;
 
+    @Field(name = "person_id", write = Field.Write.NON_NULL)
+    private String personId;
     @Field(name = "amount", write = Field.Write.NON_NULL)
     private Float amount;
 
@@ -38,8 +40,10 @@ public class Credit {
     @Field(name = "updated_at")
     private Date updatedAt;
 
-    public Credit(Float amount, Date createdAt, Date updatedAt) {
+
+    public Credit(Float amount, String personId, Date createdAt, Date updatedAt) {
         this.amount = amount;
+        this.personId = personId;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
     }

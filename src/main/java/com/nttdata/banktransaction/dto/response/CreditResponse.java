@@ -19,6 +19,9 @@ public class CreditResponse {
     @JsonProperty(value = "id")
     private String id;
 
+    @JsonProperty(value = "personId")
+    private String personId;
+
     @JsonProperty(value = "amount")
     private Float amount;
 
