@@ -2,7 +2,6 @@ package com.nttdata.banktransaction.service.impl;
 
 import com.nttdata.banktransaction.dto.mapper.CreditMapper;
 import com.nttdata.banktransaction.dto.request.CreditRequest;
-import com.nttdata.banktransaction.dto.response.proxy.PersonResponse;
 import com.nttdata.banktransaction.enums.PlanType;
 import com.nttdata.banktransaction.exceptions.CustomException;
 import com.nttdata.banktransaction.model.Credit;
@@ -12,14 +11,10 @@ import com.nttdata.banktransaction.service.ICreditService;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.util.Assert;
-import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.util.Optional;
 
 /**
  * This class defines the service of credits
@@ -50,7 +45,7 @@ public class CreditServiceImpl implements ICreditService {
         return creditRepository.findAll()
                 .onErrorResume(e -> {
                     LOGGER.error("[" + getClass().getName() + "][findAll]" + e.getMessage());
-                    return Mono.error(new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "" + e));
+                        return Mono.error(CustomException.internalServerError("Internal Server Error"));
                 });
     }
 
@@ -65,8 +60,8 @@ public class CreditServiceImpl implements ICreditService {
         return creditRepository.findById(id)
                 .onErrorResume(e -> {
                     LOGGER.error("[" + getClass().getName() + "][findById]" + e.getMessage());
-                    return Mono.error(new ResponseStatusException(HttpStatus.BAD_REQUEST, "" + e));
-                }).switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND)));
+                    return Mono.error(CustomException.badRequest("The request is invalid:" + e));
+                }).switchIfEmpty(Mono.error(CustomException.notFound("Credit not found")));
     }
 
     /**
@@ -77,9 +72,9 @@ public class CreditServiceImpl implements ICreditService {
      */
     @Override
     public Mono<Credit> create(CreditRequest request) {
-        return personProxy.getPersonById(request.getPersonId())
+        return personProxy.getPersonById(request.getClientId())
                 .flatMap(per ->
-                        creditRepository.findByPersonId(request.getPersonId())
+                        creditRepository.findByClientId(request.getClientId())
                                 .flatMap(c -> {
                                     String planType = per.getPersonType().getName();
                                     if (planType.equals(PlanType.Empresarial.toString())) {
@@ -88,7 +83,7 @@ public class CreditServiceImpl implements ICreditService {
                                                 .flatMap(creditRepository::save)
                                                 .onErrorResume(e -> {
                                                     LOGGER.error("[" + getClass().getName() + "][create]" + e.getMessage());
-                                                    return Mono.error(new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad Request" + e));
+                                                    return Mono.error(CustomException.badRequest("The request is invalid:" + e));
                                                 }).switchIfEmpty(Mono.error(CustomException.notFound("Does not created credit")));
                                     } else {
                                         return Mono.error(CustomException.badRequest("The personal plan already has a credit"));
@@ -97,7 +92,7 @@ public class CreditServiceImpl implements ICreditService {
                                         .flatMap(creditRepository::save)
                                         .onErrorResume(e -> {
                                             LOGGER.error("[" + getClass().getName() + "][create]" + e.getMessage());
-                                            return Mono.error(new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad Request" + e));
+                                            return Mono.error(CustomException.badRequest("The request is invalid:" + e));
                                         }).switchIfEmpty(Mono.error(CustomException.notFound("Does not created credit")))
                                 )
                 ).switchIfEmpty(Mono.error(CustomException.notFound("Does not exist client")));
@@ -120,8 +115,8 @@ public class CreditServiceImpl implements ICreditService {
                 .flatMap(creditRepository::save)
                 .onErrorResume(e -> {
                     LOGGER.error("[" + getClass().getName() + "][update]" + e.getMessage());
-                    return Mono.error(new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad Request" + e));
-                }).switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND)));
+                    return Mono.error(CustomException.badRequest("The request is invalid:" + e));
+                }).switchIfEmpty(Mono.error(CustomException.notFound("Credit not found")));
     }
 
     /**
@@ -135,7 +130,7 @@ public class CreditServiceImpl implements ICreditService {
         return creditRepository.deleteById(id)
                 .onErrorResume(e -> {
                     LOGGER.error("[" + getClass().getName() + "][delete]" + e.getMessage());
-                    return Mono.error(new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad Request" + e));
+                    return Mono.error(CustomException.badRequest("The request is invalid:" + e));
                 });
     }
 

@@ -1,6 +1,7 @@
 package com.nttdata.banktransaction.proxy.person;
 
 import com.nttdata.banktransaction.dto.response.proxy.PersonResponse;
+import com.nttdata.banktransaction.exceptions.CustomException;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,7 +46,7 @@ public class PersonProxy {
                 .bodyToMono(PersonResponse.class)
                 .onErrorResume(e -> {
                     LOGGER.error("[" + getClass().getName() + "][getPersonById]" + e);
-                    return Mono.error(new ResponseStatusException(HttpStatus.BAD_REQUEST));
+                    return Mono.error(CustomException.badRequest("The request to proxy is invalid"));
                 });
     }
 }

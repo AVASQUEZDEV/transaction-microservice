@@ -27,7 +27,7 @@ public class CreditMapper {
      */
     public Mono<Credit> toPostModel(CreditRequest request) {
         return Mono.just(
-                new Credit(request.getAmount(), request.getPersonId(),
+                new Credit(request.getAmount(), request.getClientId(),
                         AppUtil.dateFormat(new Date()), AppUtil.dateFormat(new Date()))
         );
     }
@@ -53,7 +53,7 @@ public class CreditMapper {
      */
     public Mono<CreditResponse> toMonoResponse(Mono<Credit> credit) {
         return credit.flatMap(c -> Mono.just(
-                new CreditResponse(c.getId(), c.getPersonId(), c.getAmount(), c.getCreatedAt(), c.getCreatedAt()))
+                new CreditResponse(c.getId(), c.getClientId(), c.getAmount(), c.getCreatedAt(), c.getCreatedAt()))
         );
     }
 

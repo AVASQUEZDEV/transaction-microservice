@@ -27,8 +27,14 @@ public class Withdrawal {
     @Id
     private String id;
 
+    @Field(name = "person_id", write = Field.Write.NON_NULL)
+    private String clientId;
+
     @Field(name = "origin_account", write = Field.Write.NON_NULL)
     private String originAccount;
+
+    @Field(name = "account_type", write = Field.Write.NON_NULL)
+    private String accountType;
 
     @Field(name = "issue_bank", write = Field.Write.NON_NULL)
     private String issueBank;
@@ -36,12 +42,13 @@ public class Withdrawal {
     @Field(name = "amount", write = Field.Write.NON_NULL)
     private Float amount;
 
-    @DateTimeFormat(pattern = "yyyy-MM-dd")
     @Field(name = "transaction_date")
     private Date transactionDate;
 
-    public Withdrawal(String originAccount, String issueBank, Float amount, Date transactionDate) {
+    public Withdrawal(String clientId, String originAccount, String accountType, String issueBank, Float amount, Date transactionDate) {
+        this.clientId = clientId;
         this.originAccount = originAccount;
+        this.accountType = accountType;
         this.issueBank = issueBank;
         this.amount = amount;
         this.transactionDate = transactionDate;

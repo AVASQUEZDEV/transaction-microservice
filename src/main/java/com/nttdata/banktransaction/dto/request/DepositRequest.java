@@ -11,12 +11,16 @@ import lombok.Data;
 @Data
 public class DepositRequest {
 
+    private String clientId;
+
     private String destinationAccount;
 
-    private String originAccount;
+    private String accountType;
 
     private Float amount;
 
     private String issueBank;
 
+    private String originAccount;
+    
 }

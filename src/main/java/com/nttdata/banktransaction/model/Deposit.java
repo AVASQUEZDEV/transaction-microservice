@@ -27,11 +27,14 @@ public class Deposit {
     @Id
     private String id;
 
+    @Field(name = "clientId", write = Field.Write.NON_NULL)
+    private String clientId;
+
     @Field(name = "destination_account", write = Field.Write.NON_NULL)
     private String destinationAccount;
 
-    @Field(name = "origin_account", write = Field.Write.NON_NULL)
-    private String originAccount;
+    @Field(name = "account_type", write = Field.Write.NON_NULL)
+    private String accountType;
 
     @Field(name = "amount", write = Field.Write.NON_NULL)
     private Float amount;
@@ -39,15 +42,19 @@ public class Deposit {
     @Field(name = "issue_bank", write = Field.Write.NON_NULL)
     private String issueBank;
 
-    @DateTimeFormat(pattern = "yyyy-MM-dd")
+    @Field(name = "origin_account", write = Field.Write.NON_NULL)
+    private String originAccount;
+
     @Field(name = "transaction_date")
     private Date transactionDate;
 
-    public Deposit(String destinationAccount, String originAccount, Float amount, String issueBank, Date transactionDate) {
+    public Deposit(String clientId, String destinationAccount, String accountType, Float amount, String issueBank, String originAccount, Date transactionDate) {
+        this.clientId = clientId;
         this.destinationAccount = destinationAccount;
-        this.originAccount = originAccount;
+        this.accountType = accountType;
         this.amount = amount;
         this.issueBank = issueBank;
+        this.originAccount = originAccount;
         this.transactionDate = transactionDate;
     }
 }

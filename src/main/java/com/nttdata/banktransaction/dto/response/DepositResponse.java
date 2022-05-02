@@ -19,17 +19,23 @@ public class DepositResponse {
     @JsonProperty(value = "id")
     private String id;
 
+    @JsonProperty(value = "clientId")
+    private String clientId;
+
     @JsonProperty(value = "destinationAccount")
     private String destinationAccount;
 
-    @JsonProperty(value = "originAccount")
-    private String originAccount;
+    @JsonProperty(value = "accountType")
+    private String accountType;
 
     @JsonProperty(value = "amount")
     private Float amount;
 
     @JsonProperty(value = "issueBank")
     private String issueBank;
+
+    @JsonProperty(value = "originAccount")
+    private String originAccount;
 
     @JsonProperty(value = "transactionDate")
     private Date transactionDate;

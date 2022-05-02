@@ -2,15 +2,14 @@ package com.nttdata.banktransaction.service.impl;
 
 import com.nttdata.banktransaction.dto.mapper.PaymentMapper;
 import com.nttdata.banktransaction.dto.request.PaymentRequest;
+import com.nttdata.banktransaction.exceptions.CustomException;
 import com.nttdata.banktransaction.model.Payment;
 import com.nttdata.banktransaction.repository.IPaymentRepository;
 import com.nttdata.banktransaction.service.IPaymentService;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -40,7 +39,7 @@ public class PaymentServiceImpl implements IPaymentService {
         return paymentRepository.findAll()
                 .onErrorResume(e -> {
                     LOGGER.error("[" + getClass().getName() + "][findAll]" + e.getMessage());
-                    return Mono.error(new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "" + e));
+                    return Mono.error(CustomException.internalServerError("Internal Server Error"));
                 });
     }
 
@@ -56,8 +55,8 @@ public class PaymentServiceImpl implements IPaymentService {
                 .flatMap(paymentRepository::save)
                 .onErrorResume(e -> {
                     LOGGER.error("[" + getClass().getName() + "][create]" + e.getMessage());
-                    return Mono.error(new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad Request" + e));
-                }).switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND)));
+                    return Mono.error(CustomException.badRequest("The request is invalid:" + e));
+                }).switchIfEmpty(Mono.error(CustomException.notFound("Payment not found")));
     }
 
     /**
@@ -76,8 +75,8 @@ public class PaymentServiceImpl implements IPaymentService {
                         .flatMap(paymentRepository::save))
                 .onErrorResume(e -> {
                     LOGGER.error("[" + getClass().getName() + "][update]" + e.getMessage());
-                    return Mono.error(new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad Request" + e));
-                }).switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND)));
+                    return Mono.error(CustomException.badRequest("The request is invalid:" + e));
+                }).switchIfEmpty(Mono.error(CustomException.notFound("Payment not found")));
     }
 
     /**
@@ -91,7 +90,7 @@ public class PaymentServiceImpl implements IPaymentService {
         return paymentRepository.deleteById(id)
                 .onErrorResume(e -> {
                     LOGGER.error("[" + getClass().getName() + "][delete]" + e.getMessage());
-                    return Mono.error(new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad Request" + e));
+                    return Mono.error(CustomException.badRequest("The request is invalid:" + e));
                 });
     }
 

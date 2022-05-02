@@ -27,7 +27,9 @@ public class WithdrawalMapper {
      */
     public Mono<Withdrawal> toPostModel(WithdrawalRequest request) {
         return Mono.just(
-                new Withdrawal(request.getOriginAccount(),
+                new Withdrawal(request.getClientId(),
+                        request.getOriginAccount(),
+                        request.getAccountType(),
                         request.getIssueBank(),
                         request.getAmount(),
                         AppUtil.dateFormat(new Date()))
@@ -56,7 +58,9 @@ public class WithdrawalMapper {
     public Mono<WithdrawalResponse> toMonoResponse(Mono<Withdrawal> withdrawal) {
         return withdrawal.flatMap(w -> Mono.just(
                 new WithdrawalResponse(w.getId(),
+                        w.getClientId(),
                         w.getOriginAccount(),
+                        w.getAccountType(),
                         w.getIssueBank(),
                         w.getAmount(),
                         w.getTransactionDate()))

@@ -27,10 +27,12 @@ public class DepositMapper {
      */
     public Mono<Deposit> toPostModel(DepositRequest request) {
         return Mono.just(
-                new Deposit(request.getDestinationAccount(),
-                        request.getOriginAccount(),
+                new Deposit(request.getClientId(),
+                        request.getDestinationAccount(),
+                        request.getAccountType(),
                         request.getAmount(),
                         request.getIssueBank(),
+                        request.getOriginAccount(),
                         AppUtil.dateFormat(new Date())
                 )
         );
@@ -58,10 +60,12 @@ public class DepositMapper {
     public Mono<DepositResponse> toMonoResponse(Mono<Deposit> deposit) {
         return deposit.flatMap(d -> Mono.just(
                 new DepositResponse(d.getId(),
+                        d.getClientId(),
                         d.getDestinationAccount(),
-                        d.getOriginAccount(),
+                        d.getAccountType(),
                         d.getAmount(),
                         d.getIssueBank(),
+                        d.getOriginAccount(),
                         d.getTransactionDate()
                 ))
         );

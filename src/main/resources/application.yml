@@ -1,4 +1,5 @@
 server:
+  port: 8081
   error:
     include-message: always
 spring:
@@ -16,3 +17,8 @@ microservices:
     end-point:
       person: ${microservices.person.base-path}/persons
       person-type: ${microservices.person.base-path}/person-types
+  bank-account:
+    base-url: http://localhost:8080
+    base-path: /api/v1
+    end-point:
+      bank-account: ${microservices.bank-account.base-path}/bank-accounts

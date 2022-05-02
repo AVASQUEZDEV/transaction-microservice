@@ -19,8 +19,14 @@ public class WithdrawalResponse {
     @JsonProperty(value = "id")
     private String id;
 
+    @JsonProperty(value = "clientId")
+    private String clientId;
+
     @JsonProperty(value = "originAccount")
     private String originAccount;
+
+    @JsonProperty(value = "accountType")
+    private String accountType;
 
     @JsonProperty(value = "issueBank")
     private String issueBank;

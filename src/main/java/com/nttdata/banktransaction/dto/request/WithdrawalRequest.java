@@ -11,7 +11,11 @@ import lombok.Data;
 @Data
 public class WithdrawalRequest {
 
+    private String clientId;
+
     private String originAccount;
+
+    private String accountType;
 
     private String issueBank;
 
