@@ -1,24 +1,8 @@
-server:
-  port: 8081
-  error:
-    include-message: always
 spring:
-  data:
-    mongodb:
-      host: localhost
-      port: 27017
-      database: banktransactiondb
-      #username: xyz
-      #password: xyz
-microservices:
-  client:
-    base-url: http://localhost:8083
-    base-path: /api/v1
-    end-point:
-      client: ${microservices.client.base-path}/clients
-      plan: ${microservices.client.base-path}/plans
-  bank-account:
-    base-url: http://localhost:8080
-    base-path: /api/v1
-    end-point:
-      bank-account: ${microservices.bank-account.base-path}/bank-accounts
+  application:
+    name: bank-transaction-microservice
+  cloud:
+    config:
+      uri: http://localhost:8090
+      username: nttdata
+      password: nttd4t4
