@@ -10,7 +10,7 @@ import java.util.Date;
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
-public class PersonTypeResponse {
+public class PlanResponse {
 
 	@JsonProperty(value = "id")
 	private String id;

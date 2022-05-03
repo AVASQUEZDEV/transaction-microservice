@@ -5,7 +5,7 @@ import com.nttdata.banktransaction.dto.request.CreditRequest;
 import com.nttdata.banktransaction.enums.PlanType;
 import com.nttdata.banktransaction.exceptions.CustomException;
 import com.nttdata.banktransaction.model.Credit;
-import com.nttdata.banktransaction.proxy.person.PersonProxy;
+import com.nttdata.banktransaction.proxy.client.ClientProxy;
 import com.nttdata.banktransaction.repository.ICreditRepository;
 import com.nttdata.banktransaction.service.ICreditService;
 import lombok.RequiredArgsConstructor;
@@ -32,8 +32,8 @@ public class CreditServiceImpl implements ICreditService {
 
     private final CreditMapper creditMapper;
 
-    //private PersonProxy personProxy = new PersonProxy();
-    private final PersonProxy personProxy;
+    //private ClientProxy clientProxy = new ClientProxy();
+    private final ClientProxy clientProxy;
 
     /**
      * This method returns a list of credits
@@ -72,11 +72,11 @@ public class CreditServiceImpl implements ICreditService {
      */
     @Override
     public Mono<Credit> create(CreditRequest request) {
-        return personProxy.getPersonById(request.getClientId())
+        return clientProxy.getClientById(request.getClientId())
                 .flatMap(per ->
                         creditRepository.findByClientId(request.getClientId())
                                 .flatMap(c -> {
-                                    String planType = per.getPersonType().getName();
+                                    String planType = per.getPlan().getName();
                                     if (planType.equals(PlanType.Empresarial.toString())) {
                                         LOGGER.info("[" + getClass().getName() + "][create]" + planType);
                                         return creditMapper.toPostModel(request)

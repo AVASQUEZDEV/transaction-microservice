@@ -14,10 +14,10 @@ import java.util.Date;
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
-public class PersonResponse {
+public class ClientResponse {
 
 	@JsonProperty(value = "id")
-	private String personId;
+	private String id;
 	
 	@JsonProperty(value = "firstName")
 	private String firstName;
@@ -50,5 +50,5 @@ public class PersonResponse {
 	private Date updatedAt;
 
 	@JsonProperty(value = "personType")
-	private PersonTypeResponse personType;
+	private PlanResponse plan;
 }

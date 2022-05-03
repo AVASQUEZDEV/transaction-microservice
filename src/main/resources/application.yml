@@ -11,12 +11,12 @@ spring:
       #username: xyz
       #password: xyz
 microservices:
-  person:
+  client:
     base-url: http://localhost:8083
     base-path: /api/v1
     end-point:
-      person: ${microservices.person.base-path}/persons
-      person-type: ${microservices.person.base-path}/person-types
+      client: ${microservices.client.base-path}/clients
+      plan: ${microservices.client.base-path}/plans
   bank-account:
     base-url: http://localhost:8080
     base-path: /api/v1

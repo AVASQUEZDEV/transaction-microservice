@@ -1,16 +1,14 @@
-package com.nttdata.banktransaction.proxy.person;
+package com.nttdata.banktransaction.proxy.client;
 
-import com.nttdata.banktransaction.dto.response.proxy.PersonResponse;
+import com.nttdata.banktransaction.dto.response.proxy.ClientResponse;
 import com.nttdata.banktransaction.exceptions.CustomException;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Mono;
 
 /**
@@ -21,14 +19,14 @@ import reactor.core.publisher.Mono;
  */
 @RequiredArgsConstructor
 @Service
-public class PersonProxy {
+public class ClientProxy {
 
-    private final static Logger LOGGER = LoggerFactory.getLogger(PersonProxy.class);
+    private final static Logger LOGGER = LoggerFactory.getLogger(ClientProxy.class);
 
-    @Value("${microservices.person.base-url}")
+    @Value("${microservices.client.base-url}")
     private String baseUrl;
 
-    @Value("${microservices.person.end-point.person}")
+    @Value("${microservices.client.end-point.client}")
     private String path;
 
     public String getCompleteURL() {
@@ -38,14 +36,15 @@ public class PersonProxy {
 
     private final WebClient webClient;
 
-    public Mono<PersonResponse> getPersonById(String id) {
+    public Mono<ClientResponse> getClientById(String id) {
+        LOGGER.info("[REQUEST][URL][getBankAccountByCCI]:" + getCompleteURL() + "/" + id);
         return webClient.get()
                 .uri(getCompleteURL() + "/" + id)
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
-                .bodyToMono(PersonResponse.class)
+                .bodyToMono(ClientResponse.class)
                 .onErrorResume(e -> {
-                    LOGGER.error("[" + getClass().getName() + "][getPersonById]" + e);
+                    LOGGER.error("[" + getClass().getName() + "][getClientById]" + e);
                     return Mono.error(CustomException.badRequest("The request to proxy is invalid"));
                 });
     }
