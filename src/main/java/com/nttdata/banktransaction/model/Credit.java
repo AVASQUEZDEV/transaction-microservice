@@ -7,7 +7,6 @@ import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
-import org.springframework.format.annotation.DateTimeFormat;
 
 import java.util.Date;
 
@@ -27,23 +26,36 @@ public class Credit {
     @Id
     private String id;
 
-    @Field(name = "person_id", write = Field.Write.NON_NULL)
+    @Field(name = "client_id", write = Field.Write.NON_NULL)
     private String clientId;
     @Field(name = "amount", write = Field.Write.NON_NULL)
     private Float amount;
 
-    @DateTimeFormat(pattern = "yyyy-MM-dd")
+    @Field(name = "fees_amount")
+    private Float feesAmount;
+
+    @Field(name = "fees_quantity")
+    private Long feesQuantity;
+
+    @Field(name = "expiration_date")
+    private Date expirationDate;
+
+    @Field(name = "credit_status")
+    private String creditStatus;
     @Field(name = "created_at")
     private Date createdAt;
 
-    @DateTimeFormat(pattern = "yyyy-MM-dd")
     @Field(name = "updated_at")
     private Date updatedAt;
 
 
-    public Credit(Float amount, String clientId, Date createdAt, Date updatedAt) {
-        this.amount = amount;
+    public Credit(String clientId, Float amount, Long feesQuantity, Date expirationDate,
+                  String creditStatus, Date createdAt, Date updatedAt) {
         this.clientId = clientId;
+        this.amount = amount;
+        this.feesQuantity = feesQuantity;
+        this.expirationDate = expirationDate;
+        this.creditStatus = creditStatus;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
     }

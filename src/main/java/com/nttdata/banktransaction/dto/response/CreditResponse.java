@@ -25,6 +25,18 @@ public class CreditResponse {
     @JsonProperty(value = "amount")
     private Float amount;
 
+    @JsonProperty(value = "feesAmount")
+    private Float feesAmount;
+
+    @JsonProperty(value = "feesQuantity")
+    private Long feesQuantity;
+
+    @JsonProperty(value = "expirationDate")
+    private Date expirationDate;
+
+    @JsonProperty(value = "creditStatus")
+    private String creditStatus;
+
     @JsonProperty(value = "createdAt")
     private Date createdAt;
 

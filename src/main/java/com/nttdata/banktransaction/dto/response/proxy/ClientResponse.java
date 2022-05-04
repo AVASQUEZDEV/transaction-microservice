@@ -49,6 +49,6 @@ public class ClientResponse {
 	@JsonProperty(value = "updatedAt")
 	private Date updatedAt;
 
-	@JsonProperty(value = "personType")
+	@JsonProperty(value = "plan")
 	private PlanResponse plan;
 }

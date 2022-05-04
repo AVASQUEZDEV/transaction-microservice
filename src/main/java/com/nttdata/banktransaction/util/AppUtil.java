@@ -5,6 +5,7 @@ import lombok.SneakyThrows;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Locale;
 
 /**
  * This class defines methods the global use.
@@ -26,6 +27,11 @@ public class AppUtil {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat(pattern);
         String newDate = simpleDateFormat.format(date);
         return simpleDateFormat.parse(newDate);
+    }
+
+    public static Float decimalFormat(Float request) {
+        return Float.valueOf(String.format(Locale.getDefault(),
+                "%.2f", request).replace(",", "."));
     }
 
 }

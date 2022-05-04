@@ -8,12 +8,15 @@ import com.nttdata.banktransaction.model.Credit;
 import com.nttdata.banktransaction.proxy.client.ClientProxy;
 import com.nttdata.banktransaction.repository.ICreditRepository;
 import com.nttdata.banktransaction.service.ICreditService;
+import com.nttdata.banktransaction.util.AppUtil;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import java.util.Locale;
 
 
 /**
@@ -45,7 +48,7 @@ public class CreditServiceImpl implements ICreditService {
         return creditRepository.findAll()
                 .onErrorResume(e -> {
                     LOGGER.error("[" + getClass().getName() + "][findAll]" + e.getMessage());
-                        return Mono.error(CustomException.internalServerError("Internal Server Error"));
+                    return Mono.error(CustomException.internalServerError("Internal Server Error"));
                 });
     }
 
@@ -65,6 +68,20 @@ public class CreditServiceImpl implements ICreditService {
     }
 
     /**
+     * @param clientId request
+     * @return client
+     */
+    @Override
+    public Flux<Credit> findByClientId(String clientId) {
+        return creditRepository.findAll()
+                .filter(c -> c.getClientId().equals(clientId))
+                .onErrorResume(e -> {
+                    LOGGER.error("[" + getClass().getName() + "][findById]" + e.getMessage());
+                    return Mono.error(CustomException.badRequest("The request is invalid:" + e));
+                }).switchIfEmpty(Mono.error(CustomException.notFound("Credit not found")));
+    }
+
+    /**
      * This method creates a credits
      *
      * @param request request to create new credit
@@ -73,14 +90,20 @@ public class CreditServiceImpl implements ICreditService {
     @Override
     public Mono<Credit> create(CreditRequest request) {
         return clientProxy.getClientById(request.getClientId())
-                .flatMap(per ->
+                .doOnNext(cli -> LOGGER.info("[CreditServiceImpl][ClientProxy]" + cli))
+                .flatMap(cli ->
                         creditRepository.findByClientId(request.getClientId())
+                                .doOnNext(c -> LOGGER.info("[CreditServiceImpl][CreditRepository]" + c))
                                 .flatMap(c -> {
-                                    String planType = per.getPlan().getName();
+                                    String planType = cli.getPlan().getName();
                                     if (planType.equals(PlanType.Empresarial.toString())) {
                                         LOGGER.info("[" + getClass().getName() + "][create]" + planType);
                                         return creditMapper.toPostModel(request)
-                                                .flatMap(creditRepository::save)
+                                                .flatMap(credit -> {
+                                                    Float feesAmount = AppUtil.decimalFormat(credit.getAmount() / credit.getFeesQuantity());
+                                                    credit.setFeesAmount(feesAmount);
+                                                    return creditRepository.save(credit);
+                                                })
                                                 .onErrorResume(e -> {
                                                     LOGGER.error("[" + getClass().getName() + "][create]" + e.getMessage());
                                                     return Mono.error(CustomException.badRequest("The request is invalid:" + e));
@@ -89,7 +112,11 @@ public class CreditServiceImpl implements ICreditService {
                                         return Mono.error(CustomException.badRequest("The personal plan already has a credit"));
                                     }
                                 }).switchIfEmpty(creditMapper.toPostModel(request)
-                                        .flatMap(creditRepository::save)
+                                        .flatMap(credit -> {
+                                            Float feesAmount = AppUtil.decimalFormat(credit.getAmount() / credit.getFeesQuantity());
+                                            credit.setFeesAmount(feesAmount);
+                                            return creditRepository.save(credit);
+                                        })
                                         .onErrorResume(e -> {
                                             LOGGER.error("[" + getClass().getName() + "][create]" + e.getMessage());
                                             return Mono.error(CustomException.badRequest("The request is invalid:" + e));

@@ -27,7 +27,8 @@ public class CreditMapper {
      */
     public Mono<Credit> toPostModel(CreditRequest request) {
         return Mono.just(
-                new Credit(request.getAmount(), request.getClientId(),
+                new Credit(request.getClientId(), request.getAmount(),
+                        request.getFeesQuantity(), request.getExpirationDate(), CreditStatus.PENDIENTE,
                         AppUtil.dateFormat(new Date()), AppUtil.dateFormat(new Date()))
         );
     }
@@ -40,7 +41,7 @@ public class CreditMapper {
      * @return credit model
      */
     public Mono<Credit> toPutModel(Credit credit, CreditRequest request) {
-        credit.setAmount(request.getAmount());
+        credit.setCreditStatus(request.getCreditStatus());
         credit.setUpdatedAt(AppUtil.dateFormat(new Date()));
         return Mono.just(credit);
     }
@@ -53,7 +54,8 @@ public class CreditMapper {
      */
     public Mono<CreditResponse> toMonoResponse(Mono<Credit> credit) {
         return credit.flatMap(c -> Mono.just(
-                new CreditResponse(c.getId(), c.getClientId(), c.getAmount(), c.getCreatedAt(), c.getCreatedAt()))
+                new CreditResponse(c.getId(), c.getClientId(), c.getAmount(), c.getFeesAmount(), c.getFeesQuantity(),
+                        c.getExpirationDate(), c.getCreditStatus(), c.getCreatedAt(), c.getCreatedAt()))
         );
     }
 

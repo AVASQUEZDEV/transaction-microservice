@@ -37,7 +37,7 @@ public class ClientProxy {
     private final WebClient webClient;
 
     public Mono<ClientResponse> getClientById(String id) {
-        LOGGER.info("[REQUEST][URL][getBankAccountByCCI]:" + getCompleteURL() + "/" + id);
+        LOGGER.info("[REQUEST][URL][getClientById]:" + getCompleteURL() + "/" + id);
         return webClient.get()
                 .uri(getCompleteURL() + "/" + id)
                 .accept(MediaType.APPLICATION_JSON)

@@ -39,6 +39,16 @@ public class CreditRestController {
         return creditMapper.toFluxResponse(creditService.findAll());
     }
 
+
+    /**
+     * @return list of credits
+     */
+    @ResponseStatus(HttpStatus.OK)
+    @GetMapping(value = "/{clientId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Flux<CreditResponse> getByClientId(@PathVariable(name = "clientId") String clientId) {
+        return creditMapper.toFluxResponse(creditService.findByClientId(clientId));
+    }
+
     /**
      * @param request request to create credit
      * @return credit created
@@ -52,7 +62,7 @@ public class CreditRestController {
     }
 
     /**
-     * @param id            credit id to update
+     * @param id      credit id to update
      * @param request request for update credit
      * @return credit updated
      */
@@ -62,7 +72,7 @@ public class CreditRestController {
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<CreditResponse> update(@PathVariable(name = "id") String id,
-                               @RequestBody CreditRequest request) {
+                                       @RequestBody CreditRequest request) {
         return creditMapper.toMonoResponse(creditService.update(id, request));
     }
 
