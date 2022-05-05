@@ -4,6 +4,7 @@ import com.nttdata.banktransaction.dto.request.CreditRequest;
 import com.nttdata.banktransaction.dto.response.CreditResponse;
 import com.nttdata.banktransaction.model.Credit;
 import com.nttdata.banktransaction.util.AppUtil;
+import com.nttdata.banktransaction.util.Constant;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -28,7 +29,7 @@ public class CreditMapper {
     public Mono<Credit> toPostModel(CreditRequest request) {
         return Mono.just(
                 new Credit(request.getClientId(), request.getAmount(),
-                        request.getFeesQuantity(), request.getExpirationDate(), CreditStatus.PENDIENTE,
+                        request.getFeesQuantity(), request.getExpirationDate(), Constant.CREDIT_STATUS_PENDING,
                         AppUtil.dateFormat(new Date()), AppUtil.dateFormat(new Date()))
         );
     }
