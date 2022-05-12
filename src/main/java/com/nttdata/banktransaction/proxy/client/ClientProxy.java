@@ -23,23 +23,15 @@ public class ClientProxy {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(ClientProxy.class);
 
-    @Value("${microservices.client.base-url}")
-    private String baseUrl;
-
-    @Value("${microservices.client.end-point.client}")
-    private String path;
-
-    public String getCompleteURL() {
-        return baseUrl + path;
-    }
-    //private WebClient.Builder webClient = WebClient.builder();
+    @Value("${api-gateway.routes.ms-client.client}")
+    private String clientURL;
 
     private final WebClient webClient;
 
     public Mono<ClientResponse> getClientById(String id) {
-        LOGGER.info("[REQUEST][URL][getClientById]:" + getCompleteURL() + "/" + id);
+        LOGGER.info("[REQUEST][URL][getClientById]:" + clientURL + "/" + id);
         return webClient.get()
-                .uri(getCompleteURL() + "/" + id)
+                .uri(clientURL + "/" + id)
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
                 .bodyToMono(ClientResponse.class)

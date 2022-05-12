@@ -3,6 +3,7 @@ spring:
     name: bank-transaction-microservice
   cloud:
     config:
+      #uri: https://nttdata-microservice-config-serve.azurewebsites.net
       uri: http://localhost:8090
       username: nttdata
       password: nttd4t4

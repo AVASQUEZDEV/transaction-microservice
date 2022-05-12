@@ -6,18 +6,15 @@ import com.nttdata.banktransaction.dto.request.proxy.BankAccountRequest;
 import com.nttdata.banktransaction.enums.TransactionType;
 import com.nttdata.banktransaction.exceptions.CustomException;
 import com.nttdata.banktransaction.model.Deposit;
-import com.nttdata.banktransaction.proxy.bankaccount.BankAccountProxy;
+import com.nttdata.banktransaction.proxy.card.CardProxy;
 import com.nttdata.banktransaction.repository.IDepositRepository;
 import com.nttdata.banktransaction.service.IDepositService;
-import com.nttdata.banktransaction.util.AppUtil;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-
-import java.util.Date;
 
 
 /**
@@ -36,7 +33,7 @@ public class DepositServiceImpl implements IDepositService {
 
     private final DepositMapper depositMapper;
 
-    private final BankAccountProxy bankAccountProxy;
+    private final CardProxy cardProxy;
 
     /**
      * This method returns a list of deposits
@@ -60,9 +57,9 @@ public class DepositServiceImpl implements IDepositService {
      */
     @Override
     public Mono<Deposit> create(DepositRequest request) {
-        return bankAccountProxy.getBankAccountByCCI(request.getDestinationAccount())
-                .flatMap(ba -> bankAccountProxy
-                        .balanceUpdate(ba.getId(),
+        return cardProxy.getCardByCci("")
+                .flatMap(ba -> cardProxy
+                        .updateCardBalance(ba.getId(),
                                 new BankAccountRequest(request.getAmount()),
                                 TransactionType.DEPOSIT)
                         .flatMap(bac -> depositMapper

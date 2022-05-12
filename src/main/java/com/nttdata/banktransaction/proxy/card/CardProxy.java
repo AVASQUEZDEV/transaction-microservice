@@ -1,4 +1,4 @@
-package com.nttdata.banktransaction.proxy.bankaccount;
+package com.nttdata.banktransaction.proxy.card;
 
 import com.nttdata.banktransaction.dto.request.proxy.BankAccountRequest;
 import com.nttdata.banktransaction.dto.response.proxy.BankAccountResponse;
@@ -22,47 +22,40 @@ import reactor.core.publisher.Mono;
  */
 @RequiredArgsConstructor
 @Service
-public class BankAccountProxy {
+public class CardProxy {
 
-    private final static Logger LOGGER = LoggerFactory.getLogger(ClientProxy.class);
+    private final static Logger LOGGER = LoggerFactory.getLogger(CardProxy.class);
 
-    @Value("${microservices.bank-account.base-url}")
-    private String baseUrl;
-
-    @Value("${microservices.bank-account.end-point.bank-account}")
-    private String path;
-
-    public String getCompleteURL() {
-        return baseUrl + path;
-    }
+    @Value("${api-gateway.routes.ms-card.card}")
+    private String cardURL;
 
     private final WebClient webClient;
 
-    public Mono<BankAccountResponse> getBankAccountByCCI(String id) {
-        LOGGER.info("[REQUEST][URL][getBankAccountByCCI]:" + getCompleteURL() + "/cci/" + id);
+    public Mono<BankAccountResponse> getCardByCci(String cci) {
+        LOGGER.info("[REQUEST][URL][getCardByCci]:" + cardURL + "/cci/" + cci);
         return webClient.get()
-                .uri(getCompleteURL() + "/cci/" + id)
+                .uri(cardURL + "/cci/" + cci)
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
                 .bodyToMono(BankAccountResponse.class)
                 .onErrorResume(e -> {
-                    LOGGER.error("[" + getClass().getName() + "][getBankAccountByCCI]" + e);
+                    LOGGER.error("[" + getClass().getName() + "][getCardByCci]" + e);
                     return Mono.error(CustomException.badRequest("The request to proxy is invalid"));
                 });
     }
 
-    public Mono<BankAccountResponse> balanceUpdate(String id, BankAccountRequest request,
+    public Mono<BankAccountResponse> updateCardBalance(String id, BankAccountRequest request,
                                                    TransactionType transactionType) {
-        LOGGER.info("[REQUEST][URL][balanceUpdate]" + getCompleteURL() + "/" + id);
-        LOGGER.info("[REQUEST][BODY][balanceUpdate]" + request.toString());
+        LOGGER.info("[REQUEST][URL][updateCardBalance]" + cardURL + "/" + id);
+        LOGGER.info("[REQUEST][BODY][updateCardBalance]" + request.toString());
         return webClient.put()
-                .uri(getCompleteURL() + "/" + id + "?transactionType=" + transactionType)
+                .uri(cardURL + "/" + id + "?transactionType=" + transactionType)
                 .accept(MediaType.APPLICATION_JSON)
                 .body(Mono.just(request), BankAccountRequest.class)
                 .retrieve()
                 .bodyToMono(BankAccountResponse.class)
                 .onErrorResume(e -> {
-                    LOGGER.error("[" + getClass().getName() + "][getBankAccountByCCI]" + e);
+                    LOGGER.error("[" + getClass().getName() + "][updateCardBalance]" + e);
                     return Mono.error(CustomException.badRequest("The request to proxy is invalid"));
                 });
     }

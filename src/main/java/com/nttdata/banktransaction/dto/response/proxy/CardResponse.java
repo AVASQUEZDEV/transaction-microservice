@@ -1,38 +1,40 @@
 package com.nttdata.banktransaction.dto.response.proxy;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.util.Date;
 
 /**
- * This class defines the response of bank account
+ * This class defines the response of bank account charge
  *
  * @author Alcibar Vasquez
  * @version 1.0
  */
 @AllArgsConstructor
-@NoArgsConstructor
 @Data
-public class BankAccountResponse {
+public class CardResponse {
 
-    @JsonProperty(value = "id")
     private String id;
 
-    @JsonProperty(value = "clientId")
-    private String clientId;
+    @JsonProperty(value = "cardNumber")
+    private String cardNumber;
 
-    @JsonProperty(value = "productId")
-    private String productId;
+    @JsonProperty(value = "securityCode")
+    private Long securityCode;
 
-    @JsonProperty(value = "cardId")
-    private String cardId;
+    @JsonProperty(value = "expirationDate")
+    private Date expirationDate;
+
+    @JsonProperty(value = "cci")
+    private String cci;
 
     @JsonProperty(value = "balance")
     private Float balance;
+
+    @JsonProperty(value = "bankName")
+    private String bankName;
 
     @JsonProperty(value = "createdAt")
     private Date createdAt;

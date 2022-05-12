@@ -6,7 +6,7 @@ import com.nttdata.banktransaction.dto.request.proxy.BankAccountRequest;
 import com.nttdata.banktransaction.enums.TransactionType;
 import com.nttdata.banktransaction.exceptions.CustomException;
 import com.nttdata.banktransaction.model.Withdrawal;
-import com.nttdata.banktransaction.proxy.bankaccount.BankAccountProxy;
+import com.nttdata.banktransaction.proxy.card.CardProxy;
 import com.nttdata.banktransaction.repository.IWithdrawalRepository;
 import com.nttdata.banktransaction.service.IWithdrawalService;
 import lombok.RequiredArgsConstructor;
@@ -32,7 +32,7 @@ public class WithdrawalServiceImpl implements IWithdrawalService {
 
     private final WithdrawalMapper withdrawalMapper;
 
-    private final BankAccountProxy bankAccountProxy;
+    private final CardProxy cardProxy;
 
     /**
      * This method returns a list of withdrawal
@@ -56,9 +56,9 @@ public class WithdrawalServiceImpl implements IWithdrawalService {
      */
     @Override
     public Mono<Withdrawal> create(WithdrawalRequest request) {
-        return bankAccountProxy.getBankAccountByCCI(request.getOriginAccount())
-                .flatMap(wd -> bankAccountProxy
-                        .balanceUpdate(wd.getId(),
+        return cardProxy.getCardByCci(request.getOriginAccount())
+                .flatMap(wd -> cardProxy
+                        .updateCardBalance(wd.getId(),
                                 new BankAccountRequest(request.getAmount()),
                                 TransactionType.WITHDRAWAL)
                         .flatMap(w -> withdrawalMapper.toPostModel(request)
